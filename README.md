@@ -4,5 +4,6 @@ I started this repo when I first starting learning Calculus in high school, and 
 
 ## Below Are Some Resources
 
-1. [https://onion.io/2bt-pid-control-python/](https://onion.io/2bt-pid-control-python/)
-2. [https://alefram.github.io/posts/How-to-use-python-for-pid-controller-design](https://alefram.github.io/posts/How-to-use-python-for-pid-controller-design)
+1. [https://onion.io/2bt-pid-control-python/](https://onion.io/2bt-pid-control-python/) 
+2. **[https://alefram.github.io/posts/How-to-use-python-for-pid-controller-design](https://alefram.github.io/posts/How-to-use-python-for-pid-controller-design)**
+3. [Modern Control Enginnering by Katsuhiko Ogata](https://ia601706.us.archive.org/33/items/modern-control-engineering/Modern%20Control%20Engineering.pdf)
