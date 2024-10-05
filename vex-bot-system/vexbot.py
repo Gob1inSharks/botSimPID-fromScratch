@@ -47,6 +47,18 @@ class VexBot:
 
         self.gyro = self.direction
 
+    def updateMotors(self):
+
+        if self.motor[0] > 10:
+            self.motor[0] = 10
+        elif self.motor[0] < -10:
+            self.motor[0] = -10
+
+        if self.motor[1] > 10:
+            self.motor[1] = 10
+        elif self.motor[1] < -10:
+            self.motor[1] = -10
+
 
     def update(self,dt):
 
