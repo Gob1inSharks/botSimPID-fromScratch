@@ -25,6 +25,6 @@ class Controller:
         self.previous_step = self.current_step
 
         if V > 0:
-            self.bot.motor[0] -= V
+            self.bot.motor[0] -= abs(V)
         elif V < 0:
-            self.bot.motor[1] -= V
+            self.bot.motor[1] -= abs(V)
