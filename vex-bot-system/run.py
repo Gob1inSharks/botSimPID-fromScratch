@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     control = Controller(bot)
 
-    control.Kp = 0.001
-    control.Kd = 0.02
+    control.Kp = 0.01
+    control.Kd = 0.01
     control.target = 0
 
     initial_conditions = (INITIAL_POSITION, INITIAL_VELOCITY)
@@ -29,6 +29,7 @@ if __name__ == "__main__":
     time = utils.getTime(TIME_START, TIME_STOP, TIME_INCREMENTS)
 
     position_y = []
+    position_x = []
 
     for dt in time:
 
@@ -37,12 +38,11 @@ if __name__ == "__main__":
         control.updateMotors()
 
         position_y.append(bot.position[1])
-
-        print(dt,bot.position[1],bot.gyro)
+        position_x.append(bot.position[0])
 
     #print(time) #for debugging
     #print(position)
 
-    plt.plot(time, position_y)
+    plt.plot(position_x, position_y)
 
     plt.show()
