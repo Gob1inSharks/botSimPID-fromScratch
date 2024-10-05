@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     control = Controller(bot)
 
-    control.Kp = 0.01
-    control.Kd = 0.01
+    control.Kp = 2
+    control.Kd = 0.012
     control.target = 0
 
     initial_conditions = (INITIAL_POSITION, INITIAL_VELOCITY)
