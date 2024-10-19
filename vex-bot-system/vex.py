@@ -1,3 +1,22 @@
+"""
+Author: Not Goblinsharks
+Comments:
+
+    This is a simulation of a vex drivetrain that can be controlled by the user.
+
+    And it is the biggest piece of shit I have ever coded
+
+    TODO: Clean this crap up
+
+    TODO: The bot's angle isn't rendering as tangental to the line
+    This is obivous when you run the program
+
+    TODO: ADD ACCERLATION
+    This is a problem 
+    
+    TODO: ADD BRAKE        
+
+"""
 import random
 import numpy as np
 import pygame
@@ -5,7 +24,7 @@ import os
 import sys
 import math
 
-random.seed(10)
+random.seed(2049)
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -15,6 +34,16 @@ DELETING_SUBDIRECTORIES = ['/__pycache__','/temp']
 COLOUR_KEY = (0,0,0) #black
 
 def load_image(path): 
+
+    """
+    This function loads an image from the specified path and sets the color key for transparency.
+
+    Parameters:
+        path (str): The path to the image file.
+
+    Returns:
+        pygame.Surface: The loaded image with the color key set for transparency.
+    """
 
     image = pygame.image.load(DIR+BASE_IMAGE_PATH+'/'+path).convert() 
     image.set_colorkey(COLOUR_KEY)
@@ -29,15 +58,19 @@ class VexCar:
 
         self.theta = 0
 
-        self.NOISE_MAGNITUDE = 20
+        self.NOISE_MAGNITUDE = 4
 
         self.MASS = 10
         
         self.s = [0,0]
+        self.h = 0
         self.v = [0,0]
         self.V = [12,12]
 
-        self.RADIUS = 2.75 * 2.56
+        self.previous = [0,0,0,0]
+
+        self.RADIUS_RIGHT = 5
+        self.RADIUS_LEFT  = 7
 
         self.TICK = 0.1 #dt
         self.FPS = 10
@@ -103,7 +136,7 @@ class VexCar:
         self.NOISE_MAGNITUDE = noise
         self.TICK = tick
         
-    def vol2speed(self,V):
+    def vol2speed(self,V,radius = 1):
 
         rpm = 34 * V
 
@@ -112,7 +145,7 @@ class VexCar:
         elif rpm < 0:
             rpm = 0
 
-        return (2*np.pi*self.RADIUS) * rpm / 60
+        return (2*np.pi*radius) * rpm / 60
 
     def run(self,totalSeconds):
 
@@ -129,7 +162,12 @@ class VexCar:
 
             self.scene.blit(self.assets['field'],(0,0))
 
-            self.draw(self.SCENE_WIDTH//2,self.s[0],100,100,(255,255,255))
+            self.drawCar(self.SCENE_WIDTH//2 + self.h,
+                      (self.s[0]+self.s[1])//2,
+                      100,100,(255,255,255),
+                      rotation = self.findCarAngle())
+            
+            self.drawLine()
 
             self.screen.blit(pygame.transform.scale(self.scene,(self.SCREEN_WIDTH,self.SCREEN_HEIGHT)), (0,0)) 
 
@@ -145,27 +183,29 @@ class VexCar:
 
             self.advance(dt = dt)
 
-        #print(positions)
+        #print(positions) #for debugging(
 
-    def draw(self, x, y, width, height, color, rotation=0):
+    def getXY(self):
+
+        return (max(self.s[0],self.s[1]),
+                self.SCENE_WIDTH//2+self.h)
+
+    def findCarAngle(self):
+
+        return math.atan2(self.h,max(self.s[0],self.s[1]))*180/math.pi
+
+    def drawCar(self, x, y, width, height, color, rotation=0):
 
         points = []
 
-        # The distance from the center of the rectangle to
-        # one of the corners is the same for each corner.
         radius = math.sqrt((height / 2)**2 + (width / 2)**2)
 
-        # Get the angle to one of the corners with respect
-        # to the x-axis.
         angle = math.atan2(height / 2, width / 2)
 
-        # Transform that angle to reach each corner of the rectangle.
         angles = [angle, -angle + math.pi, angle + math.pi, -angle]
 
-        # Convert rotation from degrees to radians.
         rot_radians = (math.pi / 180) * rotation
 
-        # Calculate the coordinates of each point.
         for angle in angles:
             y_offset = -1 * radius * math.sin(angle + rot_radians)
             x_offset = radius * math.cos(angle + rot_radians)
@@ -173,10 +213,25 @@ class VexCar:
 
         pygame.draw.polygon(self.scene, color, points)
 
+    def drawLine(self, width = 1):
+
+        pygame.draw.line(self.assets["field"],
+                          (255,255,0), 
+                         
+                         ((self.SCENE_WIDTH//2 + self.previous[3]),
+                          (self.previous[0]+self.previous[1])/2), 
+
+                          ((self.SCENE_WIDTH//2 + self.h),
+                          (self.s[0]+self.s[1])/2), 
+                
+                          width)
+
     def advance(self,dt = 0.1):
 
-        self.v[0] = self.vol2speed(self.V[0])
-        self.v[1] = self.vol2speed(self.V[1])
+        self.previous = [self.s[0],self.s[1],self.findCarAngle(),self.h]
+
+        self.v[0] = self.vol2speed(self.V[0],radius=self.RADIUS_RIGHT)
+        self.v[1] = self.vol2speed(self.V[1],radius =self.RADIUS_LEFT)
 
         if self.v[0] > self.MAX_SPEED:
             self.v[0] = self.MAX_SPEED
@@ -188,14 +243,17 @@ class VexCar:
         elif self.v[1] < -self.MAX_SPEED:
             self.v[1] = -self.MAX_SPEED
 
-        self.v[0] -= random.randint(0, int(self.NOISE_MAGNITUDE*1000))/1000
+        self.v[0] -= random.randint(int(self.NOISE_MAGNITUDE*500), int(self.NOISE_MAGNITUDE*1000))/1000
         #self.v[1] -= random.randint(0, int(self.NOISE_MAGNITUDE*1000))/1000
 
         self.s[0] += self.v[0]*dt
         self.s[1] += self.v[1]*dt
 
+        # todo clean this up
+        self.h -= (self.s[1]-self.s[0]) #add a horizontal component to the car
+
         #print(self.v[0],self.v[1]) #for debugging
-        print(self.s[0],self.s[1],self.timer) #for debugging
+        print(self.s[0],self.s[1],self.findCarAngle()) #for debugging
 
 # program starts here
 if __name__ == "__main__":
