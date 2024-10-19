@@ -1,9 +1,9 @@
 import random
 import numpy as np
-import cv2
 import pygame
 import os
 import sys
+import math
 
 random.seed(10)
 
@@ -16,8 +16,8 @@ COLOUR_KEY = (0,0,0) #black
 
 def load_image(path): 
 
-    image = pygame.image.load(DIR+BASE_IMAGE_PATH+'/'+path).convert() #convert it for better performance Uwu It helps a lot 
-    image.set_colorkey(COLOUR_KEY) #changes this colour into transparent 
+    image = pygame.image.load(DIR+BASE_IMAGE_PATH+'/'+path).convert() 
+    image.set_colorkey(COLOUR_KEY)
 
     return image 
 
@@ -25,11 +25,11 @@ class VexCar:
 
     def __init__(self,controller = None):
 
-        self.MAX_SPEED = 4.5
+        self.MAX_SPEED = 200
 
         self.theta = 0
 
-        self.NOISE_MAGNITUDE = 1
+        self.NOISE_MAGNITUDE = 20
 
         self.MASS = 10
         
@@ -40,7 +40,7 @@ class VexCar:
         self.RADIUS = 2.75 * 2.56
 
         self.TICK = 0.1 #dt
-        self.FPS = 1/self.TICK
+        self.FPS = 10
 
         self.controller = controller
 
@@ -51,26 +51,28 @@ class VexCar:
         pygame.init() 
         pygame.display.set_caption("VexCar Simulation") 
 
-        self.SCENE_HIEGHT = 1080
-        self.SCENE_WIDTH = 1920
+        self.SCENE_HIEGHT = 1377
+        self.SCENE_WIDTH = 1344
 
-        self.SCREEN_TO_SCENE_RATIO = 2
+        self.SCREEN_TO_SCENE_RATIO = 1
 
         self.SCENE_RATIO = float(self.SCENE_HIEGHT / self.SCENE_WIDTH)
 
-        self.SCREEN_HEIGHT = self.SCENE_HIEGHT*self.SCREEN_TO_SCENE_RATIO
-        self.SCREEN_WIDTH = self.SCENE_HIEGHT*self.SCREEN_TO_SCENE_RATIO
+        self.SCREEN_HEIGHT = int(self.SCENE_HIEGHT*self.SCREEN_TO_SCENE_RATIO)
+        self.SCREEN_WIDTH = int(self.SCENE_HIEGHT*self.SCREEN_TO_SCENE_RATIO)
 
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-        self.scene = pygame.Surface((self.DISPLAY_WIDTH,self.DISPLAY_HIEGHT))
+        self.scene = pygame.Surface((self.SCENE_WIDTH,self.SCENE_HIEGHT))
 
         self.clock = pygame.time.Clock() 
 
-        self.assets = { 
-            "icon" : load_image("icon.png"), #todo create assets
+        self.assets = {
+            "field":load_image('field.png'),
         }
 
         self.timer = 0
+
+        self.MAX_RPM = 400
 
     def set(self,V1,V2):
 
@@ -110,7 +112,7 @@ class VexCar:
         elif rpm < 0:
             rpm = 0
 
-        return (2*np.pi*self.radius) * rpm / 60
+        return (2*np.pi*self.RADIUS) * rpm / 60
 
     def run(self,totalSeconds):
 
@@ -123,13 +125,17 @@ class VexCar:
                     pygame.quit() 
                     sys.exit() 
 
-            self.screen.fill((0,0,0)) 
+            self.scene.fill((35,35,35)) 
 
-            self.draw()
+            self.scene.blit(self.assets['field'],(0,0))
+
+            self.draw(self.SCENE_WIDTH//2,self.s[0],100,100,(255,255,255))
+
+            self.screen.blit(pygame.transform.scale(self.scene,(self.SCREEN_WIDTH,self.SCREEN_HEIGHT)), (0,0)) 
 
             pygame.display.update() 
 
-            dt = self.clock.tick(self.FPS) * .001 * self.FPS
+            dt = self.clock.tick(self.FPS) * .001 
 
             self.timer += dt
 
@@ -141,9 +147,31 @@ class VexCar:
 
         #print(positions)
 
-    def draw(self):
+    def draw(self, x, y, width, height, color, rotation=0):
 
-        cv2.drawContours(self.image, [self.s[0],self.s[1]], -1, (0,255,0), 3)
+        points = []
+
+        # The distance from the center of the rectangle to
+        # one of the corners is the same for each corner.
+        radius = math.sqrt((height / 2)**2 + (width / 2)**2)
+
+        # Get the angle to one of the corners with respect
+        # to the x-axis.
+        angle = math.atan2(height / 2, width / 2)
+
+        # Transform that angle to reach each corner of the rectangle.
+        angles = [angle, -angle + math.pi, angle + math.pi, -angle]
+
+        # Convert rotation from degrees to radians.
+        rot_radians = (math.pi / 180) * rotation
+
+        # Calculate the coordinates of each point.
+        for angle in angles:
+            y_offset = -1 * radius * math.sin(angle + rot_radians)
+            x_offset = radius * math.cos(angle + rot_radians)
+            points.append((x + x_offset, y + y_offset))
+
+        pygame.draw.polygon(self.scene, color, points)
 
     def advance(self,dt = 0.1):
 
@@ -167,52 +195,10 @@ class VexCar:
         self.s[1] += self.v[1]*dt
 
         #print(self.v[0],self.v[1]) #for debugging
-        print(self.s[0],self.s[1])
-            
+        print(self.s[0],self.s[1],self.timer) #for debugging
 
-            
-
-
-
-
+# program starts here
 if __name__ == "__main__":
 
     vex = VexCar()
     vex.run(60)
-
-    """
-
-    import matplotlib.pyplot as plt
-
-    import utils
-
-    TIME_START = 0
-    TIME_STOP = 60
-    TIME_INCREMENTS = 0.1
-
-    INITIAL_POSITION = 0
-    INITIAL_VELOCITY = 0
-
-    bot = VexBot()
-
-    initial_conditions = (INITIAL_POSITION, INITIAL_VELOCITY)
-
-    time = utils.getTime(TIME_START, TIME_STOP, TIME_INCREMENTS)
-
-    position_y = []
-
-    for dt in time:
-
-        bot.update(dt)
-
-        position_y.append(bot.position[1])
-
-        print(dt,bot.position[1],bot.gyro)
-
-    #print(time) #for debugging
-    #print(position)
-
-    plt.plot(time, position_y)
-
-    plt.show()
-    """
