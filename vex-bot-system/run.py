@@ -67,8 +67,10 @@ def run(totalSeconds):
 
 if __name__ == "__main__":
 
-    control.Kp = 3
-    control.Kd = 0.012
-    control.Ki = 0.0001
+    control.Kp = 0.1
+    control.Ki = 0.001
+    control.Kd = 2
+    
+    control.target = 0
 
     run(TIME_STOP)

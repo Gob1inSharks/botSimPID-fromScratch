@@ -15,18 +15,24 @@ class Controller:
         #self.theta = 0
 
         self.previous_step = self.bot.gyro
-        self.current_step = self.bot.gyro #the current difference in the voltages of the bot
+        self.current_step = self.bot.gyro
         self.advanced_step = self.target
+        self.all_steps = 0
 
     def updateMotors(self):
 
-        self.current_step = self.bot.gyro
-        dV = self.Kp * (self.current_step-self.previous_step)# + self.Kd * self.current_step
         self.previous_step = self.current_step
+        self.current_step = self.target - self.bot.gyro
+        self.advanced_step = self.target
+        self.all_steps += self.current_step
 
+        dV =(self.Kp * (self.current_step) 
+           + self.Ki * (self.all_steps) 
+           + self.Kd * (self.current_step-self.previous_step))
+        
         if dV > 0:
-            self.bot.V[0] -= (dV)
-            self.bot.V[1] += (dV)
+            self.bot.V[0] += (dV)
+            self.bot.V[1] -= (dV)
         elif dV < 0:
-            self.bot.V[0] -= (dV)
-            self.bot.V[1] += (dV)
+            self.bot.V[0] += (dV)
+            self.bot.V[1] -= (dV)
