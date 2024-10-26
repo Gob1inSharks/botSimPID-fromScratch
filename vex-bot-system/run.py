@@ -23,13 +23,34 @@ INITIAL_VELOCITY = 0
 bot = VexCar()
 control = Controller(bot)
 
-bot.MAX_VOLTAGE = 12
+def displayInitValues():
 
-control.Kp = 0.03
-control.Ki = 0.0005
-control.Kd = 3
+    values = f"""
+--init values:
+    target: {control.target}
+    Kp: {control.Kp}
+    Ki: {control.Ki}
+    Kd: {control.Kd}"""
 
-control.target = 0
+    print(values)
+    return values
+
+def printRunningValues():
+
+    values=f"""
+--timer: {bot.timer}
+--bot values: 
+    [in] V1 = {bot.V[0]},
+    [in] V2 = {bot.V[1]},
+    [out] angle = {bot.gyro}
+--control values: 
+    previous_step = {control.previous_step},
+    current_step = {control.current_step},
+    advanced_step = {control.advanced_step},
+    all_steps = {control.all_steps}"""
+    
+    print(values)
+    return values
 
 def run(totalSeconds):
 
@@ -71,8 +92,21 @@ def run(totalSeconds):
 
         bot.advance(dt = dt)
 
+        printRunningValues()
+
         #print(positions) #for debugging(
 
 if __name__ == "__main__":
 
+    control.Kp = 0.03
+    control.Ki = 0.001
+    control.Kd = 2
+
+    control.target = 0
+
+    #this is here to test the
+    #versatility of PID controller
+    bot.NOISE_MAGNITUDE = 12
+
+    displayInitValues()
     run(TIME_STOP)
