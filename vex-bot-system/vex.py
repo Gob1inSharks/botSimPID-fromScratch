@@ -52,10 +52,13 @@ class VexCar:
         self.NOISE_MAGNITUDE = 4
 
         self.MASS = 10
-        
+
+        self.MAX_VOLTAGE = 12
+
         self.s = [0,0]
         self.h = 0
         self.v = [0,0]
+
         self.V = [12,12]
 
         self.gyro = self.findCarAngle()
@@ -69,8 +72,6 @@ class VexCar:
         self.FPS = 10
 
         self.controller = controller
-
-        self.MAX_VOLTAGE = 12
 
         #pygame stuff
 

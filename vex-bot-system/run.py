@@ -23,6 +23,14 @@ INITIAL_VELOCITY = 0
 bot = VexCar()
 control = Controller(bot)
 
+bot.MAX_VOLTAGE = 12
+
+control.Kp = 0.03
+control.Ki = 0.0005
+control.Kd = 3
+
+control.target = 0
+
 def run(totalSeconds):
 
     #times = np.arange(0, totalSeconds, self.TICK)
@@ -66,11 +74,5 @@ def run(totalSeconds):
         #print(positions) #for debugging(
 
 if __name__ == "__main__":
-
-    control.Kp = 0.1
-    control.Ki = 0.001
-    control.Kd = 2
-    
-    control.target = 0
 
     run(TIME_STOP)
