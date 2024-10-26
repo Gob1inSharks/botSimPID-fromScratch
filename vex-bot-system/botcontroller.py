@@ -8,7 +8,7 @@ class Controller:
         #V = self.Kp * (theta(t)-theta(t-1)) + self.Kd * (theta(t))
         self.Kp = 0.1
         self.Kd = 0.1
-        #self.Ki = #the integral can be neglected here
+        self.Ki = 0.1
 
         self.target = 0 #the target angle you want the bot to reach
 
@@ -21,10 +21,12 @@ class Controller:
     def updateMotors(self):
 
         self.current_step = self.bot.gyro
-        V = self.Kp * (self.current_step-self.previous_step) + self.Kd * self.current_step
+        dV = self.Kp * (self.current_step-self.previous_step)# + self.Kd * self.current_step
         self.previous_step = self.current_step
 
-        if V > 0:
-            self.bot.motor[0] -= abs(V)
-        elif V < 0:
-            self.bot.motor[1] -= abs(V)
+        if dV > 0:
+            self.bot.V[0] -= (dV)
+            self.bot.V[1] += (dV)
+        elif dV < 0:
+            self.bot.V[0] -= (dV)
+            self.bot.V[1] += (dV)
