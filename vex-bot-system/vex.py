@@ -17,6 +17,7 @@ Comments:
     TODO: ADD BRAKE        
 
 """
+
 import random
 import numpy as np
 import pygame
@@ -34,16 +35,6 @@ DELETING_SUBDIRECTORIES = ['/__pycache__','/temp']
 COLOUR_KEY = (0,0,0) #black
 
 def load_image(path): 
-
-    """
-    This function loads an image from the specified path and sets the color key for transparency.
-
-    Parameters:
-        path (str): The path to the image file.
-
-    Returns:
-        pygame.Surface: The loaded image with the color key set for transparency.
-    """
 
     image = pygame.image.load(DIR+BASE_IMAGE_PATH+'/'+path).convert() 
     image.set_colorkey(COLOUR_KEY)
@@ -66,6 +57,8 @@ class VexCar:
         self.h = 0
         self.v = [0,0]
         self.V = [12,12]
+
+        self.gyro = self.findCarAngle()
 
         self.previous = [0,0,0,0]
 
@@ -149,7 +142,7 @@ class VexCar:
 
     def run(self,totalSeconds):
 
-        times = np.arange(0, totalSeconds, self.TICK)
+        #times = np.arange(0, totalSeconds, self.TICK)
 
         while True:
 
@@ -253,10 +246,10 @@ class VexCar:
         self.h -= (self.s[1]-self.s[0]) #add a horizontal component to the car
 
         #print(self.v[0],self.v[1]) #for debugging
-        print(self.s[0],self.s[1],self.findCarAngle()) #for debugging
+        print(self.V[0],self.V[1],self.findCarAngle()) #for debugging
 
 # program starts here
 if __name__ == "__main__":
 
     vex = VexCar()
-    vex.run(60)
+    vex.run(20)
