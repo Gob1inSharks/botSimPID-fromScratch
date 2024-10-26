@@ -1,8 +1,14 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import random
+#import matplotlib.pyplot as plt
+#import numpy as np
+#import random
 
-from vexbot import VexBot
+import pygame
+import sys
+import os
+
+#import math
+
+from vex import VexCar
 from botcontroller import Controller
 
 import utils
@@ -14,35 +20,55 @@ TIME_INCREMENTS = 0.1
 INITIAL_POSITION = 0
 INITIAL_VELOCITY = 0
 
-if __name__ == "__main__":
+bot = VexCar()
+control = Controller(bot)
 
-    bot = VexBot()
+def run(totalSeconds):
 
-    control = Controller(bot)
+    #times = np.arange(0, totalSeconds, self.TICK)
 
-    control.Kp = 2
-    control.Kd = 0.012
-    control.target = 0
+    while True:
 
-    initial_conditions = (INITIAL_POSITION, INITIAL_VELOCITY)
+        for event in pygame.event.get(): 
+            if event.type == pygame.QUIT: 
+                pygame.quit() 
+                sys.exit() 
 
-    time = utils.getTime(TIME_START, TIME_STOP, TIME_INCREMENTS)
+        bot.scene.fill((35,35,35)) 
 
-    position_y = []
-    position_x = []
+        bot.scene.blit(bot.assets['field'],(0,0))
 
-    for dt in time:
+        bot.drawCar(bot.SCENE_WIDTH//2 + bot.h,
+                      (bot.s[0]+bot.s[1])//2,
+                      100,100,(255,255,255),
+                      rotation = bot.findCarAngle())
+        
+        bot.gyro = bot.findCarAngle()
+            
+        bot.drawLine()
 
-        bot.update(dt)
+        bot.screen.blit(pygame.transform.scale(bot.scene,(bot.SCREEN_WIDTH,bot.SCREEN_HEIGHT)), (0,0)) 
+
+        pygame.display.update() 
+
+        dt = bot.clock.tick(bot.FPS) * .001 
+
+        bot.timer += dt
+
+        if bot.timer > totalSeconds:
+            pygame.quit() 
+            sys.exit() 
 
         control.updateMotors()
 
-        position_y.append(bot.position[1])
-        position_x.append(bot.position[0])
+        bot.advance(dt = dt)
 
-    #print(time) #for debugging
-    #print(position)
+        #print(positions) #for debugging(
 
-    plt.plot(position_x, position_y)
+if __name__ == "__main__":
 
-    plt.show()
+    control.Kp = 3
+    control.Kd = 0.012
+    control.Ki = 0.0001
+
+    run(TIME_STOP)
