@@ -49,7 +49,7 @@ class VexCar:
 
         self.theta = 0
 
-        self.NOISE_MAGNITUDE = 4
+        self.NOISE_MAGNITUDE = 7
 
         self.MASS = 10
 
@@ -237,7 +237,10 @@ class VexCar:
         elif self.v[1] < -self.MAX_SPEED:
             self.v[1] = -self.MAX_SPEED
 
-        self.v[0] -= random.randint(int(self.NOISE_MAGNITUDE*500), int(self.NOISE_MAGNITUDE*1000))/1000
+        if(random.randint(0,1) == 0):
+            self.v[0] -= random.randint(int(self.NOISE_MAGNITUDE*500), int(self.NOISE_MAGNITUDE*1000))/1000
+        else:
+            self.v[1] -= random.randint(int(self.NOISE_MAGNITUDE*500), int(self.NOISE_MAGNITUDE*1000))/1000
         #self.v[1] -= random.randint(0, int(self.NOISE_MAGNITUDE*1000))/1000
 
         self.s[0] += self.v[0]*dt
@@ -247,7 +250,7 @@ class VexCar:
         self.h -= (self.s[1]-self.s[0]) #add a horizontal component to the car
 
         #print(self.v[0],self.v[1]) #for debugging
-        print(self.V[0],self.V[1],self.findCarAngle()) #for debugging
+        #print(self.V[0],self.V[1],self.findCarAngle()) #for debugging
 
 # program starts here
 if __name__ == "__main__":
